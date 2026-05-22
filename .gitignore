@@ -10,3 +10,12 @@
 
 # Python
 __pycache__/
+
+# Python Environments & Cache
+**/__pycache__/
+**/venv/
+**/.env
+
+# Local Janitor Reports (Dynamically generated)
+janitor/report.json
+janitor/report.md
