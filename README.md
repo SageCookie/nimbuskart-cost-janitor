@@ -29,6 +29,27 @@ pip install -r requirements.txt
 python janitor.py --dry-run
 ```
 
+## Architecture
+
+
+                                 +-------------------------+
+                                 |   GitHub Actions (CI)   |
+                                 +-----------+-------------+
+                                             |
+                                 +-----------v-------------+
+                                 |  LocalStack Container   | (Simulated AWS)
+                                 |  (Port: 4566)           |
+                                 +-----+-----------+-------+
+                                       |           |
+       Provision Baseline              |           |    Detect & Report
++------------------------------+       |           |  +------------------------------+
+| Terraform (Infrastructure)   |-------+           +--| Python (Cost Janitor)        |
+| - VPC & Subnets              |                      | - boto3 SDK                  |
+| - EC2 Instances (Web Tier)   |                      | - Rule-based evaluation      |
+| - S3 Bucket (Logs)           |                      | - JSON & MD Generation       |
+| - Orphaned EBS Volume        |                      +------------------------------+
++------------------------------+
+
 ## Decisions & deviations
 Pinned LocalStack to v3.8: I explicitly avoided the latest tag because LocalStack recently introduced a mandatory authentication token wall for their community image. Pinning to 3.8 ensures true zero-cost, zero-auth local execution.
 
@@ -40,3 +61,10 @@ Unsafe SSH Default Flagged: The spec requested opening port 22 to 0.0.0.0/0. I i
 
 ## Trade-offs
 If I had one more week to work on this, I would implement an asynchronous Boto3 strategy (using aiobotocore) within the Python script. The current synchronous looping mechanism is highly effective for a staging environment, but in an enterprise AWS account with tens of thousands of volumes, synchronous calls risk hitting Lambda execution timeouts. Furthermore, I would migrate Terraform's state management from local .tfstate files to a remote backend (S3 + DynamoDB locking) to secure team collaboration.
+
+## AI usage disclosure
+* Tools Used: I used an LLM to generate the core Python boilerplate for `boto3`, structure the JSON schema, draft standard Terraform configurations, and outline the GitHub Actions CI/CD YAML.
+* What it got wrong: 
+    1. **Infrastructure:** The AI generated Terraform for S3 lifecycle and versioning rules that caused the LocalStack v3.8 API to hang indefinitely during the `apply` phase.
+    2. **Version Control:** The AI generated PowerShell commands (`echo > .gitignore`) to set up file tracking, but it failed to account for Windows defaulting to UTF-16 encoding. Git requires UTF-8, so it ignored the file entirely and attempted to upload over 100MB of hidden `.terraform/` binaries.
+* Manual Code Section: I manually stripped the unsupported S3 lifecycle blocks from `main.tf` to stabilize the CI/CD pipeline. Furthermore, I manually authored the `.gitignore` file in my text editor to enforce UTF-8 encoding, and manually executed the Git commands to purge the polluted history. I chose to do this manually because LLMs often hallucinate support for specific local environments (like LocalStack feature parity and Windows OS encoding defaults), and ensuring CI/CD stability and a secure Git history requires strict human oversight.
