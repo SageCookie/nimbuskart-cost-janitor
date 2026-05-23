@@ -27,6 +27,7 @@ python -m venv venv
 .\venv\Scripts\Activate  # Windows (Use source venv/bin/activate for Linux/Mac)
 pip install -r requirements.txt
 python janitor.py --dry-run
+```
 
 ## Decisions & deviations
 Pinned LocalStack to v3.8: I explicitly avoided the latest tag because LocalStack recently introduced a mandatory authentication token wall for their community image. Pinning to 3.8 ensures true zero-cost, zero-auth local execution.
@@ -37,5 +38,5 @@ Bypassed tflocal wrapper: I routed standard Terraform natively using the AWS_END
 
 Unsafe SSH Default Flagged: The spec requested opening port 22 to 0.0.0.0/0. I implemented this as requested to satisfy the network baseline but heavily strongly advise restricting this CIDR block to a Bastion host or VPN subnet in production.
 
-Trade-offs
+## Trade-offs
 If I had one more week to work on this, I would implement an asynchronous Boto3 strategy (using aiobotocore) within the Python script. The current synchronous looping mechanism is highly effective for a staging environment, but in an enterprise AWS account with tens of thousands of volumes, synchronous calls risk hitting Lambda execution timeouts. Furthermore, I would migrate Terraform's state management from local .tfstate files to a remote backend (S3 + DynamoDB locking) to secure team collaboration.

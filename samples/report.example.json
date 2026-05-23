@@ -1,0 +1,53 @@
+{
+    "scan_timestamp": "2026-05-22T05:16:04Z",
+    "account_id": "000000000000",
+    "region": "us-east-1",
+    "summary": {
+        "total_orphans": 3,
+        "estimated_monthly_waste_usd": 0.8
+    },
+    "findings": [
+        {
+            "resource_id": "vol-45fdfe97",
+            "resource_type": "ebs_volume",
+            "reason": "unattached",
+            "age_days": 0,
+            "estimated_monthly_cost_usd": 0.8,
+            "tags": {
+                "Owner": "devops-team",
+                "Environment": "staging",
+                "ManagedBy": "terraform",
+                "Name": "nimbuskart-orphan-vol",
+                "Project": "nimbuskart"
+            },
+            "suggested_action": "delete",
+            "safe_to_auto_delete": true
+        },
+        {
+            "resource_id": "vol-4083b99a",
+            "resource_type": "ebs_volume",
+            "reason": "missing_required_tags",
+            "age_days": 0,
+            "estimated_monthly_cost_usd": 0.0,
+            "tags": {
+                "Project": null,
+                "Environment": null
+            },
+            "suggested_action": "tag",
+            "safe_to_auto_delete": false
+        },
+        {
+            "resource_id": "vol-eb81efff",
+            "resource_type": "ebs_volume",
+            "reason": "missing_required_tags",
+            "age_days": 0,
+            "estimated_monthly_cost_usd": 0.0,
+            "tags": {
+                "Project": null,
+                "Environment": null
+            },
+            "suggested_action": "tag",
+            "safe_to_auto_delete": false
+        }
+    ]
+}
