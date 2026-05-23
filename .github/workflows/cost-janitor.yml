@@ -1,0 +1,91 @@
+name: Cost Janitor Pipeline
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  run-janitor:
+    runs-on: ubuntu-latest
+
+    # This spins up LocalStack inside the GitHub runner
+    services:
+      localstack:
+        image: localstack/localstack:3.8
+        ports:
+          - 4566:4566
+        env:
+          SERVICES: ec2,s3
+          DEFAULT_REGION: us-east-1
+        options: >-
+          --name=localstack
+          --health-cmd="curl -s http://localhost:4566/_localstack/health | grep -q '\"ec2\": \"\\(available\\|running\\)\"'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.0"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Python Dependencies
+        run: |
+          cd janitor
+          pip install -r requirements.txt
+
+      - name: Apply Terraform Infrastructure
+        env:
+          AWS_ENDPOINT_URL: "http://localhost:4566"
+          AWS_ACCESS_KEY_ID: "mock_key"
+          AWS_SECRET_ACCESS_KEY: "mock_secret"
+          AWS_DEFAULT_REGION: "us-east-1"
+        run: |
+          cd terraform
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Run Cost Janitor (Dry Run)
+        env:
+          AWS_ENDPOINT_URL: "http://localhost:4566"
+          AWS_ACCESS_KEY_ID: "mock_key"
+          AWS_SECRET_ACCESS_KEY: "mock_secret"
+          AWS_DEFAULT_REGION: "us-east-1"
+        run: |
+          cd janitor
+          python janitor.py --dry-run
+        # We explicitly allow this step to fail so we can still upload the reports
+        continue-on-error: true
+        id: janitor_scan
+
+      - name: Upload Janitor Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: cost-janitor-reports
+          path: |
+            janitor/report.json
+            janitor/report.md
+
+      # This posts the markdown report as a comment on the PR
+      - name: Post PR Comment
+        uses: mshick/add-pr-comment@v2
+        if: always()
+        with:
+          message-path: janitor/report.md
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Finally, fail the pipeline if orphans were found
+      - name: Enforce Pipeline Failure on Waste
+        if: steps.janitor_scan.outcome == 'failure'
+        run: |
+          echo "Orphans detected. Failing pipeline to prevent waste."
+          exit 1
