@@ -56,6 +56,6 @@ We need to know if this tool is actually working or if it broke silently. I woul
 
   **Why:** No alerts for this one; it just sits on a dashboard so the FinOps team can clearly see how much money this script is saving the company every month.
 
-## 5. What I did not build
+## 5. What I Consciously Left Out
 - Because this is a local proof-of-concept, I left Terraform's state files local (.tfstate). In a real team environment, doing that is a massive security risk and guarantees merge conflicts, so I would absolutely move the state to an S3 bucket with DynamoDB locking.
 - I also kept the Python script simple by using standard, synchronous API calls. This is perfectly fine for a small test environment, but if we ran this in a massive enterprise AWS account with 10,000 volumes, it would probably hit a timeout limit. In that case, I'd rewrite the boto3 calls to be asynchronous using aiobotocore.
