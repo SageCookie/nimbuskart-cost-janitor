@@ -6,10 +6,9 @@ The NimbusKart Cost Janitor is a multi-cloud cost hygiene and automation tool de
 ## How to run locally
 Ensure you have Docker, Terraform (v1.5+), and Python 3.10+ installed.
 
-```bash
+
 # 1. Clone the repository
-git clone [https://github.com/SageCookie/nimbuskart-cost-janitor.git]
-(https://github.com/SageCookie/nimbuskart-cost-janitor.git)
+git clone https://github.com/SageCookie/nimbuskart-cost-janitor.git
 cd nimbuskart-cost-janitor
 
 # 2. Boot the simulated AWS environment (LocalStack)
