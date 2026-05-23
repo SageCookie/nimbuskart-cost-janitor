@@ -23,10 +23,10 @@ jobs:
           DEFAULT_REGION: us-east-1
         options: >-
           --name=localstack
-          --health-cmd="curl -s http://localhost:4566/_localstack/health | grep -q '\"ec2\": \"\\(available\\|running\\)\"'"
+          --health-cmd="curl -f http://localhost:4566/_localstack/health || exit 1" 
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
 
     steps:
       - name: Checkout Repository
