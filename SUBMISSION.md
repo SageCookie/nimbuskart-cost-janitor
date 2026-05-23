@@ -1,9 +1,9 @@
 # Submission — DevOps Engineer Assignment 
   
-**Candidate name:**  
-**Email:**  
-**Date submitted:**  
-**Hours spent (approximate):**  
+**Candidate name:**  Anuj Kumar
+**Email:**  gahlawatanuj5710@gmail.com
+**Date submitted:**  24-05-2026
+**Hours spent (approximate):**  10
   
 ## Deliverables checklist 
 - [ ] Part A: Terraform code under /terraform applies cleanly on LocalStack 
