@@ -1,8 +1,12 @@
 name: Cost Janitor Pipeline
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   run-janitor:
